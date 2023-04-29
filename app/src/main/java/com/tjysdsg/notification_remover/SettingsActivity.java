@@ -28,9 +28,7 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 NotificationListener listener = NotificationListener.get();
                 if (listener != null) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        listener.ClearNotifications();
-                    }
+                    listener.ClearOngoingNotifications();
                 }
             }
         });
