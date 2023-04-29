@@ -10,9 +10,7 @@ does exactly.
 > Meanwhile, NCleaner is not open-source.
 > Therefore, I wrote this software for you.
 
-
 # Demo
 
-![1](doc/images/voicemail_notification.jpg)
-![1](doc/images/click_notification_remover.jpg)
-![1](doc/images/voicemail_notification_gone.jpg)
+| ![1](doc/images/voicemail_notification.jpg) | ![1](doc/images/click_notification_remover.jpg) | ![1](doc/images/voicemail_notification_gone.jpg) |
+|---------------------------------------------|-------------------------------------------------|--------------------------------------------------|
