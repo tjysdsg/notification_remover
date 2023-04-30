@@ -39,6 +39,8 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
         }
 
         public void update(NotificationItem notification) {
+            checkBox.setOnCheckedChangeListener(null);
+
             // set checkBox initial status based on whether notification is snoozed
             checkBox.setChecked(!notification.isActive());
 
@@ -89,7 +91,6 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
 
     @Override
     public int getItemCount() {
-        Log.e("SHIT", "getItemCount: " + dataSource.getAllNotifications().size());
         return dataSource.getAllNotifications().size();
     }
 }
