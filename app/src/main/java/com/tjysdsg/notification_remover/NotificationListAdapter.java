@@ -38,23 +38,21 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
             desc = view.findViewById(R.id.notification_detail);
         }
 
-        public void update(INotificationDataSource dataSource, StatusBarNotification sbn) {
-            // TODO: set checkBox initial status based on whether notification is snoozed
+        public void update(NotificationItem notification) {
+            // set checkBox initial status based on whether notification is snoozed
+            checkBox.setChecked(!notification.isActive());
+
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        dataSource.hideOngoingNotification(sbn);
-                    } else {
-                        dataSource.unHideOngoingNotification(sbn);
-                    }
+                    notification.setActive(!isChecked);
                 }
             });
 
             // set icon
-            var notification = sbn.getNotification();
-            Bundle extras = notification.extras;
-            icon.setImageIcon(notification.getSmallIcon());
+            var sbn = notification.getSbn();
+            Bundle extras = sbn.getNotification().extras;
+            icon.setImageIcon(sbn.getNotification().getSmallIcon());
 
             // app name
             String appName_ = null;
@@ -86,7 +84,7 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        viewHolder.update(dataSource, dataSource.getAllNotifications().get(position));
+        viewHolder.update(dataSource.getAllNotifications().get(position));
     }
 
     @Override

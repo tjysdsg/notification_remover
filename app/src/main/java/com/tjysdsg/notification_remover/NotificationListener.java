@@ -9,7 +9,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class NotificationListener extends NotificationListenerService implements INotificationDataSource {
@@ -21,7 +23,7 @@ public class NotificationListener extends NotificationListenerService implements
 
     private final List<Consumer<NotificationListener>> callbacks = new ArrayList<>();
 
-    private final List<StatusBarNotification> notifications = new ArrayList<>();
+    private final Map<Integer, NotificationItem> notificationItems = new LinkedHashMap<>();
 
     @Override
     public void onListenerConnected() {
@@ -39,12 +41,10 @@ public class NotificationListener extends NotificationListenerService implements
         callbacks.add(callback);
     }
 
-    @Override
     public void hideOngoingNotification(StatusBarNotification sbn) {
         this.snoozeOngoingNotification(sbn, OneHundredYearMS);
     }
 
-    @Override
     public void unHideOngoingNotification(StatusBarNotification sbn) {
         this.snoozeOngoingNotification(sbn, 1);
     }
@@ -55,15 +55,35 @@ public class NotificationListener extends NotificationListenerService implements
         snoozeNotification(sbn.getKey(), milliseconds);
     }
 
+    private Consumer<Boolean> getSetActiveCallback(StatusBarNotification sbn) {
+        return (active) -> {
+            if (active) {
+                unHideOngoingNotification(sbn);
+            } else {
+                hideOngoingNotification(sbn);
+            }
+        };
+    }
+
     public void retrieveCurrentStatusBarNotifications() {
-        notifications.clear();
         var activeNotifications = this.getActiveNotifications();
         if (activeNotifications != null) {
-            notifications.addAll(Arrays.asList(activeNotifications));
+            for (var sbn : activeNotifications) {
+                notificationItems.put(
+                        sbn.getId(),
+                        new NotificationItem(sbn, true, getSetActiveCallback(sbn))
+                );
+            }
         }
+
         var snoozedNotifications = this.getSnoozedNotifications();
         if (snoozedNotifications != null) {
-            notifications.addAll(Arrays.asList(snoozedNotifications));
+            for (var sbn : snoozedNotifications) {
+                notificationItems.put(
+                        sbn.getId(),
+                        new NotificationItem(sbn, false, getSetActiveCallback(sbn))
+                );
+            }
         }
     }
 
@@ -82,8 +102,8 @@ public class NotificationListener extends NotificationListenerService implements
     }
 
     @Override
-    public List<StatusBarNotification> getAllNotifications() {
-        return notifications;
+    public List<NotificationItem> getAllNotifications() {
+        return new ArrayList<>(notificationItems.values());
     }
 
     private void TriggerAllCallbacks() {
