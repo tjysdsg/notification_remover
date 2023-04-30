@@ -1,7 +1,8 @@
 package com.tjysdsg.notification_remover;
 
-import android.app.NotificationManager;
-import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -9,48 +10,54 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class NotificationListener extends NotificationListenerService {
-
+public class NotificationListener extends NotificationListenerService implements INotificationDataSource {
     private static final String TAG = "Notification Listener";
 
-    private static NotificationListener Singleton;
     private static final long OneHundredYearMS = 100L * 365 * 24 * 3600 * 1000;
-    // private NotificationManager notificationManager;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    private final IBinder binder = new NotificationListenerBinder();
 
-        // notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    }
+    private final List<Consumer<NotificationListener>> callbacks = new ArrayList<>();
 
-    public static NotificationListener get() {
-        if (Singleton == null) {
-            Log.e(TAG, "Not yet connected, try again");
-        }
-        return Singleton;
-    }
+    private final List<StatusBarNotification> notifications = new ArrayList<>();
 
     @Override
     public void onListenerConnected() {
         Log.d(TAG, "onListenerConnected");
-        Singleton = this;
+        TriggerAllCallbacks();
     }
 
     @Override
     public void onListenerDisconnected() {
         Log.d(TAG, "onListenerDisconnected");
-        Singleton = null;
+        TriggerAllCallbacks();
     }
 
-    public void ClearOngoingNotifications() {
-        this.ClearOngoingNotifications(OneHundredYearMS);
+    public void registerListenerCallback(Consumer<NotificationListener> callback) {
+        callbacks.add(callback);
     }
 
-    public void ClearOngoingNotifications(long milliseconds) {
+    @Override
+    public void hideOngoingNotification(StatusBarNotification sbn) {
+        this.snoozeOngoingNotification(sbn, OneHundredYearMS);
+    }
+
+    @Override
+    public void unHideOngoingNotification(StatusBarNotification sbn) {
+        this.snoozeOngoingNotification(sbn, 1);
+    }
+
+    public void snoozeOngoingNotification(StatusBarNotification sbn, long milliseconds) {
+        // Will not work: notificationManager.cancel(notification.getId());
+        // But hey, 100 years, mfk!
+        snoozeNotification(sbn.getKey(), milliseconds);
+    }
+
+    public void retrieveCurrentStatusBarNotifications() {
+        notifications.clear();
         var activeNotifications = this.getActiveNotifications();
-        List<StatusBarNotification> notifications = new ArrayList<>();
         if (activeNotifications != null) {
             notifications.addAll(Arrays.asList(activeNotifications));
         }
@@ -58,21 +65,49 @@ public class NotificationListener extends NotificationListenerService {
         if (snoozedNotifications != null) {
             notifications.addAll(Arrays.asList(snoozedNotifications));
         }
+    }
 
-        for (StatusBarNotification notification : notifications) {
-            if (matchNotificationCode(notification)) {
-                // Will not work: notificationManager.cancel(notification.getId());
+    @Override
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        super.onNotificationPosted(sbn);
+        retrieveCurrentStatusBarNotifications();
+        TriggerAllCallbacks();
+    }
 
-                // But hey, 100 years, mfk!
-                snoozeNotification(notification.getKey(), milliseconds);
-            }
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn) {
+        super.onNotificationRemoved(sbn);
+        retrieveCurrentStatusBarNotifications();
+        TriggerAllCallbacks();
+    }
+
+    @Override
+    public List<StatusBarNotification> getAllNotifications() {
+        return notifications;
+    }
+
+    private void TriggerAllCallbacks() {
+        for (var c : callbacks) {
+            c.accept(this);
         }
     }
 
-    private boolean matchNotificationCode(StatusBarNotification sbn) {
-        String packageName = sbn.getPackageName();
+    @Override
+    public IBinder onBind(Intent intent) {
+        String action = intent.getAction();
 
-        Log.d(TAG, "Notification from app: " + packageName);
-        return packageName.equals(getString(R.string.voicemail_package_name));
+        if (SERVICE_INTERFACE.equals(action)) {
+            Log.d(TAG, "Bound by system");
+            return super.onBind(intent);
+        } else {
+            Log.d(TAG, "Bound by application");
+            return binder;
+        }
+    }
+
+    public class NotificationListenerBinder extends Binder {
+        public NotificationListener getService() {
+            return NotificationListener.this;
+        }
     }
 }

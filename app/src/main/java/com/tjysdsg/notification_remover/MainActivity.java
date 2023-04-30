@@ -1,44 +1,90 @@
 package com.tjysdsg.notification_remover;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.content.ComponentName;
-import android.view.View;
-import android.widget.Button;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class SettingsActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
+    RecyclerView notificationList;
+    NotificationListAdapter notificationListAdapter;
+    NotificationListener notificationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings_activity);
-
-        Button button = findViewById(R.id.clear_notifications_button);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                NotificationListener listener = NotificationListener.get();
-                if (listener != null) {
-                    listener.ClearOngoingNotifications();
-                }
-            }
-        });
+        setContentView(R.layout.main_activity);
 
         // If the user did not turn the notification listener service on we prompt him to do so
         if (!isNotificationServiceEnabled()) {
             AlertDialog enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
             enableNotificationListenerAlertDialog.show();
         }
+
+        notificationList = findViewById(R.id.notification_list);
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent intent = new Intent(
+                this,
+                NotificationListener.class
+        );
+        boolean res = bindService(
+                intent, connection, Context.BIND_AUTO_CREATE
+        );
+        if (!res) {
+            // TODO: show error dialog
+            throw new RuntimeException("Failed to bindService");
+        }
+    }
+
+    /**
+     * Defines callbacks for service binding, passed to bindService().
+     */
+    private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            var binder = (NotificationListener.NotificationListenerBinder) service;
+            notificationListener = binder.getService();
+            notificationListener.retrieveCurrentStatusBarNotifications();
+
+            notificationListAdapter = new NotificationListAdapter(notificationListener);
+            notificationList.setAdapter(notificationListAdapter);
+            notificationList.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+            notificationListener.registerListenerCallback(
+                    (listener) -> {
+                        notificationListAdapter.notifyDataSetChanged();
+                    }
+            );
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name) {
+            Log.e("SHIT", "NULL_BINDING");
+        }
+    };
+
 
     /**
      * Is Notification Service Enabled.
@@ -62,7 +108,6 @@ public class SettingsActivity extends AppCompatActivity {
         }
         return false;
     }
-
 
     /**
      * Build Notification Listener Alert Dialog.
