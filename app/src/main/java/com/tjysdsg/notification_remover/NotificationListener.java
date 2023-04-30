@@ -8,10 +8,9 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 public class NotificationListener extends NotificationListenerService implements INotificationDataSource {
@@ -23,7 +22,7 @@ public class NotificationListener extends NotificationListenerService implements
 
     private final List<Consumer<NotificationListener>> callbacks = new ArrayList<>();
 
-    private final Map<String, NotificationItem> notificationItems = new LinkedHashMap<>();
+    private final Map<String, NotificationItem> notificationItems = new TreeMap<>();
 
     @Override
     public void onListenerConnected() {
