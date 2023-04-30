@@ -12,5 +12,5 @@ does exactly.
 
 # Demo
 
-| ![1](doc/images/voicemail_notification.jpg) | ![1](doc/images/click_notification_remover.jpg) | ![1](doc/images/voicemail_notification_gone.jpg) |
-|---------------------------------------------|-------------------------------------------------|--------------------------------------------------|
+| ![1](doc/images/voicemail_notification.jpg) | ![1](doc/images/run_remover.jpg) | ![1](doc/images/voicemail_notification_gone.jpg) |
+|---------------------------------------------|----------------------------------|--------------------------------------------------|
