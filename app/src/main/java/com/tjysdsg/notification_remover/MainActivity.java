@@ -1,5 +1,6 @@
 package com.tjysdsg.notification_remover;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,11 +16,13 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
+    SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView notificationList;
     NotificationListAdapter notificationListAdapter;
     NotificationListener notificationListener;
@@ -34,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
             enableNotificationListenerAlertDialog.show();
         }
+
+        swipeRefreshLayout = findViewById(R.id.swipe_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
 
         notificationList = findViewById(R.id.notification_list);
     }
@@ -53,6 +59,14 @@ public class MainActivity extends AppCompatActivity {
             // TODO: show error dialog
             throw new RuntimeException("Failed to bindService");
         }
+    }
+
+    // Swipe down to refresh
+    @SuppressLint("NotifyDataSetChanged")
+    @Override
+    public void onRefresh() {
+        notificationListAdapter.notifyDataSetChanged();
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     /**
