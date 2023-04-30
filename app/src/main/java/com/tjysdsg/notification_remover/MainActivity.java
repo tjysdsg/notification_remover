@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     RecyclerView notificationList;
     NotificationListAdapter notificationListAdapter;
     NotificationListener notificationListener;
+    Intent notificationListenerServiceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +49,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onStart() {
         super.onStart();
 
-        Intent intent = new Intent(
+        notificationListenerServiceIntent = new Intent(
                 this,
                 NotificationListener.class
         );
         boolean res = bindService(
-                intent, connection, Context.BIND_AUTO_CREATE
+                notificationListenerServiceIntent, connection, Context.BIND_AUTO_CREATE
         );
         if (!res) {
             // TODO: show error dialog
@@ -61,10 +62,18 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopService(notificationListenerServiceIntent);
+    }
+
     // Swipe down to refresh
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onRefresh() {
+        if (notificationListener == null) return;
+        notificationListener.retrieveCurrentStatusBarNotifications();
         notificationListAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setRefreshing(false);
     }
@@ -91,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            Log.e("SHIT", "onServiceDisconnected");
         }
 
         @Override

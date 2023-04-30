@@ -23,7 +23,7 @@ public class NotificationListener extends NotificationListenerService implements
 
     private final List<Consumer<NotificationListener>> callbacks = new ArrayList<>();
 
-    private final Map<Integer, NotificationItem> notificationItems = new LinkedHashMap<>();
+    private final Map<String, NotificationItem> notificationItems = new LinkedHashMap<>();
 
     @Override
     public void onListenerConnected() {
@@ -66,11 +66,13 @@ public class NotificationListener extends NotificationListenerService implements
     }
 
     public void retrieveCurrentStatusBarNotifications() {
+        notificationItems.clear();
         var activeNotifications = this.getActiveNotifications();
         if (activeNotifications != null) {
             for (var sbn : activeNotifications) {
+                Log.e(TAG, "Active: " + sbn.getPackageName() + ", id: " + sbn.getKey());
                 notificationItems.put(
-                        sbn.getId(),
+                        sbn.getKey(),
                         new NotificationItem(sbn, true, getSetActiveCallback(sbn))
                 );
             }
@@ -79,8 +81,9 @@ public class NotificationListener extends NotificationListenerService implements
         var snoozedNotifications = this.getSnoozedNotifications();
         if (snoozedNotifications != null) {
             for (var sbn : snoozedNotifications) {
+                Log.e(TAG, "Snoozed: " + sbn.getPackageName() + ", id: " + sbn.getKey());
                 notificationItems.put(
-                        sbn.getId(),
+                        sbn.getKey(),
                         new NotificationItem(sbn, false, getSetActiveCallback(sbn))
                 );
             }

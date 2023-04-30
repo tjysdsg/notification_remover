@@ -52,7 +52,7 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
             // set icon
             var sbn = notification.getSbn();
             Bundle extras = sbn.getNotification().extras;
-            icon.setImageIcon(sbn.getNotification().getSmallIcon());
+            // icon.setImageIcon(sbn.getNotification().getSmallIcon());
 
             // app name
             String appName_ = null;
@@ -89,6 +89,7 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
 
     @Override
     public int getItemCount() {
+        Log.e("SHIT", "getItemCount: " + dataSource.getAllNotifications().size());
         return dataSource.getAllNotifications().size();
     }
 }
