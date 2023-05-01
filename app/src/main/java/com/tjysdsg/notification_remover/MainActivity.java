@@ -65,7 +65,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     protected void onStop() {
         super.onStop();
-        stopService(notificationListenerServiceIntent);
+        unbindService(connection);
+        boolean stopped = stopService(notificationListenerServiceIntent);
+        Log.e("MainActivity", "stopService returned " + stopped);
     }
 
     // Swipe down to refresh
