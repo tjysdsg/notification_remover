@@ -33,12 +33,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        // If the user did not turn the notification listener service on we prompt him to do so
-        if (!isNotificationServiceEnabled()) {
-            AlertDialog enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
-            enableNotificationListenerAlertDialog.show();
-        }
-
+        // pull down to refresh
         swipeRefreshLayout = findViewById(R.id.swipe_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
 
@@ -48,6 +43,24 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     protected void onStart() {
         super.onStart();
+
+        // Ask user for permission to manage notifications
+        if (!isNotificationServiceEnabled()) {
+            AlertDialog enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
+            enableNotificationListenerAlertDialog.show();
+        }
+
+        startNotificationListenerService();
+    }
+
+    /**
+     * Start the notification listener service. Do nothing if it's already running
+     */
+    public void startNotificationListenerService() {
+        // TODO: show alert saying the app won't work without permissions
+        if (!isNotificationServiceEnabled()) {
+            return;
+        }
 
         notificationListenerServiceIntent = new Intent(
                 this,
@@ -62,12 +75,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
+    /**
+     * Stop the notification service if it's running.
+     */
+    public void stopNotificationListenerService() {
         unbindService(connection);
         boolean stopped = stopService(notificationListenerServiceIntent);
         Log.e("MainActivity", "stopService returned " + stopped);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopNotificationListenerService();
     }
 
     // Swipe down to refresh
@@ -103,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             Log.e("SHIT", "onServiceDisconnected");
+            notificationListener = null;
         }
 
         @Override
@@ -111,10 +132,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     };
 
-
     /**
-     * Is Notification Service Enabled.
-     * Verifies if the notification listener service is enabled.
+     * Check whether the notification listener service is enabled.
      *
      * @return True if enabled, false otherwise.
      */
