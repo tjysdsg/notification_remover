@@ -3,10 +3,13 @@ package com.tjysdsg.notification_remover;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 public class MainActivity extends NotificationListenerActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -14,11 +17,16 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
     RecyclerView notificationList;
     NotificationListAdapter notificationListAdapter;
     NotificationListener notificationListener;
+    BottomSheet notificationServicePermissionBottomSheet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        notificationServicePermissionBottomSheet = new BottomSheet();
+        notificationServicePermissionBottomSheet.show(getSupportFragmentManager(), BottomSheet.TAG);
+        notificationServicePermissionBottomSheet.hide(true);
 
         // pull down to refresh
         swipeRefreshLayout = findViewById(R.id.swipe_layout);
@@ -38,24 +46,18 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
     }
 
     @Override
-    protected void askForNotificationServicePermission() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle(R.string.notification_listener_service);
-        alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
-        alertDialogBuilder.setPositiveButton(R.string.yes,
-                (dialog, id) -> jumpToNotificationServicePermissionSettingPage()
-        );
-        alertDialogBuilder.setNegativeButton(R.string.no,
-                (dialog, id) -> {
-                    // If you choose to not enable the notification listener
-                    // the app. will not work as expected
-                }
-        );
-
-        var dialog = (alertDialogBuilder.create());
-        dialog.show();
+    protected void askForNotificationServicePermission(boolean needPermission) {
+        if (needPermission) {
+            notificationServicePermissionBottomSheet.hide(false);
+            notificationServicePermissionBottomSheet.setOnClickListener(
+                    (View v) -> jumpToNotificationServicePermissionSettingPage()
+            );
+        } else {
+            notificationServicePermissionBottomSheet.hide(true);
+        }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onNotificationListenerServiceStarted(NotificationListener listener) {
         this.notificationListener = listener;

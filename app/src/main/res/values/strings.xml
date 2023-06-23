@@ -26,4 +26,5 @@
     <string name="voicemail_package_name">com.android.phone</string>
     <string name="notification_icon_content_desc">Notification Icon</string>
     <string name="notification_clear_btn">clear</string>
+    <string name="enable_button">Enable</string>
 </resources>

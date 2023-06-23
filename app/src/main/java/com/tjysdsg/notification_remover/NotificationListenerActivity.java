@@ -31,12 +31,13 @@ abstract public class NotificationListenerActivity extends AppCompatActivity imp
         // Ask user for permission to manage notifications
         if (hasNotificationServicePermission()) {
             startNotificationListenerService();
+            askForNotificationServicePermission(false);
         } else {
-            askForNotificationServicePermission();
+            askForNotificationServicePermission(true);
         }
     }
 
-    protected abstract void askForNotificationServicePermission();
+    protected abstract void askForNotificationServicePermission(boolean needPermission);
 
     /**
      * Start the notification listener service. Do nothing if it's already running
