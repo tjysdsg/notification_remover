@@ -18,7 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends AppCompatActivity implements
+        SwipeRefreshLayout.OnRefreshListener,
+        INotificationListenerActivity {
 
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     NotificationListAdapter notificationListAdapter;
     NotificationListener notificationListener;
     Intent notificationListenerServiceIntent;
+    NotificationServiceConnection notificationServiceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,37 +41,40 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout.setOnRefreshListener(this);
 
         notificationList = findViewById(R.id.notification_list);
+
+        notificationServiceConnection = new NotificationServiceConnection(this);
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
 
         // Ask user for permission to manage notifications
-        if (!isNotificationServiceEnabled()) {
+        if (isNotificationServiceEnabled()) {
+            startNotificationListenerService();
+        } else {
             AlertDialog enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
             enableNotificationListenerAlertDialog.show();
         }
-
-        startNotificationListenerService();
     }
 
     /**
      * Start the notification listener service. Do nothing if it's already running
      */
     public void startNotificationListenerService() {
-        // TODO: show alert saying the app won't work without permissions
-        if (!isNotificationServiceEnabled()) {
-            return;
-        }
+        assert isNotificationServiceEnabled();
+
+        if (notificationServiceConnection.isConnected()) return;
 
         notificationListenerServiceIntent = new Intent(
                 this,
                 NotificationListener.class
         );
         boolean res = bindService(
-                notificationListenerServiceIntent, connection, Context.BIND_AUTO_CREATE
+                notificationListenerServiceIntent, notificationServiceConnection,
+                Context.BIND_AUTO_CREATE
         );
+
         if (!res) {
             // TODO: show error dialog
             throw new RuntimeException("Failed to bindService");
@@ -79,9 +85,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * Stop the notification service if it's running.
      */
     public void stopNotificationListenerService() {
-        unbindService(connection);
-        boolean stopped = stopService(notificationListenerServiceIntent);
-        Log.e("MainActivity", "stopService returned " + stopped);
+        if (notificationServiceConnection.isConnected()) {
+            unbindService(notificationServiceConnection);
+
+            boolean stopped = stopService(notificationListenerServiceIntent);
+            Log.e("MainActivity", "stopService returned " + stopped);
+        }
     }
 
     @Override
@@ -99,38 +108,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         notificationListAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setRefreshing(false);
     }
-
-    /**
-     * Defines callbacks for service binding, passed to bindService().
-     */
-    private final ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            var binder = (NotificationListener.NotificationListenerBinder) service;
-            notificationListener = binder.getService();
-            notificationListener.retrieveCurrentStatusBarNotifications();
-
-            notificationListAdapter = new NotificationListAdapter(notificationListener);
-            notificationList.setAdapter(notificationListAdapter);
-            notificationList.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-            notificationListener.registerListenerCallback(
-                    (listener) -> {
-                        notificationListAdapter.notifyDataSetChanged();
-                    }
-            );
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            Log.e("SHIT", "onServiceDisconnected");
-            notificationListener = null;
-        }
-
-        @Override
-        public void onNullBinding(ComponentName name) {
-            Log.e("SHIT", "NULL_BINDING");
-        }
-    };
 
     /**
      * Check whether the notification listener service is enabled.
@@ -166,18 +143,39 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         alertDialogBuilder.setTitle(R.string.notification_listener_service);
         alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
         alertDialogBuilder.setPositiveButton(R.string.yes,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        startActivity(new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS));
-                    }
-                });
+                (dialog, id) -> jumpToNotificationServicePermissionSettingPage()
+        );
         alertDialogBuilder.setNegativeButton(R.string.no,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // If you choose to not enable the notification listener
-                        // the app. will not work as expected
-                    }
-                });
+                (dialog, id) -> {
+                    // If you choose to not enable the notification listener
+                    // the app. will not work as expected
+                }
+        );
         return (alertDialogBuilder.create());
+    }
+
+    private void jumpToNotificationServicePermissionSettingPage() {
+        startActivity(new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS));
+    }
+
+    @Override
+    public void onNotificationListenerServiceStarted(NotificationListener listener) {
+        this.notificationListener = listener;
+
+        listener.retrieveCurrentStatusBarNotifications();
+
+        notificationListAdapter = new NotificationListAdapter(notificationListener);
+        notificationList.setAdapter(notificationListAdapter);
+        notificationList.setLayoutManager(new LinearLayoutManager(this));
+        notificationListener.registerListenerCallback(
+                (l) -> {
+                    notificationListAdapter.notifyDataSetChanged();
+                }
+        );
+    }
+
+    @Override
+    public void onNotificationListenerServiceStopped() {
+        notificationListener = null;
     }
 }
