@@ -10,7 +10,7 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-abstract public class NotificationListenerActivity extends AppCompatActivity implements INotificationListenerActivity {
+abstract public class NotificationListenerActivity extends AppCompatActivity implements INotificationListenerOwner {
 
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";

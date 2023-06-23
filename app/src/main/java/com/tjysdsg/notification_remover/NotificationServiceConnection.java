@@ -8,10 +8,10 @@ import android.util.Log;
 
 public class NotificationServiceConnection implements ServiceConnection {
     private boolean isConnected = false;
-    private final INotificationListenerActivity activity;
+    private final INotificationListenerOwner owner;
 
-    public NotificationServiceConnection(INotificationListenerActivity a) {
-        this.activity = a;
+    public NotificationServiceConnection(INotificationListenerOwner a) {
+        this.owner = a;
     }
 
     @Override
@@ -21,14 +21,14 @@ public class NotificationServiceConnection implements ServiceConnection {
         var binder = (NotificationListener.NotificationListenerBinder) service;
         NotificationListener listener = binder.getService();
 
-        activity.onNotificationListenerServiceStarted(listener);
+        owner.onNotificationListenerServiceStarted(listener);
     }
 
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
         Log.e("SHIT", "onServiceDisconnected");
         isConnected = true;
-        activity.onNotificationListenerServiceStopped();
+        owner.onNotificationListenerServiceStopped();
     }
 
     @Override

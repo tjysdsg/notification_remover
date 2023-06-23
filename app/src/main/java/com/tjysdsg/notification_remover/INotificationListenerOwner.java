@@ -1,6 +1,6 @@
 package com.tjysdsg.notification_remover;
 
-public interface INotificationListenerActivity {
+public interface INotificationListenerOwner {
 
     void onNotificationListenerServiceStarted(NotificationListener listener);
 
