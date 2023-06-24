@@ -1,3 +1,7 @@
+![feature-graphic](https://github.com/tjysdsg/notification_remover/assets/21212505/34fe5096-0af0-4867-b946-def709507a1d)
+
+---
+
 # Remove Any Ongoing (Fixed) Notifications on Android
 
 1. Free and open-source (working on publishing to Google Play)
