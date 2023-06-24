@@ -19,6 +19,7 @@ public class NotificationListener extends NotificationListenerService implements
     private static final long OneHundredYearMS = 100L * 365 * 24 * 3600 * 1000;
 
     private final IBinder binder = new NotificationListenerBinder();
+    boolean ready = false;
 
     private final List<Consumer<NotificationListener>> callbacks = new ArrayList<>();
 
@@ -27,12 +28,15 @@ public class NotificationListener extends NotificationListenerService implements
     @Override
     public void onListenerConnected() {
         Log.d(TAG, "onListenerConnected");
+        ready = true;
+        retrieveCurrentStatusBarNotifications();
         TriggerAllCallbacks();
     }
 
     @Override
     public void onListenerDisconnected() {
         Log.d(TAG, "onListenerDisconnected");
+        ready = false;
         TriggerAllCallbacks();
     }
 
@@ -65,6 +69,8 @@ public class NotificationListener extends NotificationListenerService implements
     }
 
     public void retrieveCurrentStatusBarNotifications() {
+        if (!ready) return;
+
         notificationItems.clear();
         var activeNotifications = this.getActiveNotifications();
         if (activeNotifications != null) {

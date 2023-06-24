@@ -3,10 +3,13 @@ package com.tjysdsg.notification_remover;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.content.ComponentName;
+import android.service.notification.NotificationListenerService;
 import android.util.Log;
 
 
 public class NotificationServiceConnection implements ServiceConnection {
+    private static final String TAG = "NotificationServiceConnection";
+
     private boolean isConnected = false;
     private final INotificationListenerOwner owner;
 
@@ -26,14 +29,14 @@ public class NotificationServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
-        Log.e("SHIT", "onServiceDisconnected");
+        Log.e(TAG, "onServiceDisconnected");
         isConnected = true;
         owner.onNotificationListenerServiceStopped();
     }
 
     @Override
     public void onNullBinding(ComponentName name) {
-        Log.e("SHIT", "NULL_BINDING");
+        throw new RuntimeException("Null binding received");
     }
 
     public boolean isConnected() {
