@@ -1,15 +1,13 @@
 package com.tjysdsg.notification_remover;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 public class MainActivity extends NotificationListenerActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -18,6 +16,7 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
     NotificationListAdapter notificationListAdapter;
     NotificationListener notificationListener;
     BottomSheet notificationServicePermissionBottomSheet;
+    TextView noItemsPromptView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,15 +32,16 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
         swipeRefreshLayout.setOnRefreshListener(this);
 
         notificationList = findViewById(R.id.notification_list);
+
+        noItemsPromptView = findViewById(R.id.no_items_prompt);
     }
 
     // Swipe down to refresh
-    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onRefresh() {
         if (notificationListener == null) return;
         notificationListener.retrieveCurrentStatusBarNotifications();
-        notificationListAdapter.notifyDataSetChanged();
+        updateMainScreen();
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -68,9 +68,7 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
         notificationList.setAdapter(notificationListAdapter);
         notificationList.setLayoutManager(new LinearLayoutManager(this));
         notificationListener.registerListenerCallback(
-                (l) -> {
-                    notificationListAdapter.notifyDataSetChanged();
-                }
+                (l) -> updateMainScreen()
         );
     }
 
@@ -78,4 +76,19 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
     public void onNotificationListenerServiceStopped() {
         notificationListener = null;
     }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void updateMainScreen() {
+        notificationListAdapter.notifyDataSetChanged();
+
+        // show a text prompt if no notification is in the list
+        if (notificationListAdapter.getItemCount() == 0) {
+            swipeRefreshLayout.setVisibility(View.GONE);
+            noItemsPromptView.setVisibility(View.VISIBLE);
+        } else {
+            swipeRefreshLayout.setVisibility(View.VISIBLE);
+            noItemsPromptView.setVisibility(View.GONE);
+        }
+    }
+
 }
