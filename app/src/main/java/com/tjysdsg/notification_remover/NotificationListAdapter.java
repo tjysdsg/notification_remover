@@ -54,7 +54,7 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
             // set icon
             var sbn = notification.getSbn();
             Bundle extras = sbn.getNotification().extras;
-            // icon.setImageIcon(sbn.getNotification().getSmallIcon());
+            icon.setImageIcon(sbn.getNotification().getSmallIcon());
 
             // app name
             String appName_ = null;
