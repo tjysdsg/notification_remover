@@ -1,7 +1,10 @@
 package com.tjysdsg.notification_remover;
 
 import android.annotation.SuppressLint;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -9,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.divider.MaterialDividerItemDecoration;
 
 public class MainActivity extends NotificationListenerActivity implements SwipeRefreshLayout.OnRefreshListener {
@@ -19,6 +23,7 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
     NotificationListener notificationListener;
     BottomSheet notificationServicePermissionBottomSheet;
     TextView noItemsPromptView;
+    int notificationIconColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +41,10 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
         notificationList = findViewById(R.id.notification_list);
 
         noItemsPromptView = findViewById(R.id.no_items_prompt);
+
+        notificationIconColor = MaterialColors.getColor(
+                this, com.google.android.material.R.attr.colorPrimaryVariant, Color.BLACK
+        );
     }
 
     // Swipe down to refresh
@@ -66,7 +75,7 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
 
         listener.retrieveCurrentStatusBarNotifications();
 
-        notificationListAdapter = new NotificationListAdapter(notificationListener);
+        notificationListAdapter = new NotificationListAdapter(notificationListener, notificationIconColor);
         notificationList.setAdapter(notificationListAdapter);
         notificationList.setLayoutManager(new LinearLayoutManager(this));
         notificationListener.registerListenerCallback(

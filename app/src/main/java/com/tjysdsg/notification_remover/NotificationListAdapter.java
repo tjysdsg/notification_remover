@@ -2,6 +2,7 @@ package com.tjysdsg.notification_remover;
 
 import android.app.Notification;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class NotificationListAdapter extends RecyclerView.Adapter<NotificationListAdapter.ViewHolder> {
     private final INotificationDataSource dataSource;
+    private int notificationIconColor;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         View view;
@@ -27,15 +29,17 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
         TextView appName;
         TextView title;
         TextView desc;
+        int iconColor;
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, int iconColor) {
             super(view);
             this.view = view;
-            checkBox = view.findViewById(R.id.clear_notification_checkbox);
-            icon = view.findViewById(R.id.notification_icon);
-            appName = view.findViewById(R.id.app_name);
-            title = view.findViewById(R.id.notification_title);
-            desc = view.findViewById(R.id.notification_detail);
+            this.checkBox = view.findViewById(R.id.clear_notification_checkbox);
+            this.icon = view.findViewById(R.id.notification_icon);
+            this.appName = view.findViewById(R.id.app_name);
+            this.title = view.findViewById(R.id.notification_title);
+            this.desc = view.findViewById(R.id.notification_detail);
+            this.iconColor = iconColor;
         }
 
         public void update(NotificationItem notification) {
@@ -54,7 +58,9 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
             // set icon
             var sbn = notification.getSbn();
             Bundle extras = sbn.getNotification().extras;
-            icon.setImageIcon(sbn.getNotification().getSmallIcon());
+            Icon notificationIcon = sbn.getNotification().getSmallIcon();
+            notificationIcon.setTint(iconColor);
+            icon.setImageIcon(notificationIcon);
 
             // app name
             String appName_ = null;
@@ -71,8 +77,9 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
         }
     }
 
-    public NotificationListAdapter(INotificationDataSource dataSource) {
+    public NotificationListAdapter(INotificationDataSource dataSource, int notificationIconColor) {
         this.dataSource = dataSource;
+        this.notificationIconColor = notificationIconColor;
     }
 
     @NonNull
@@ -81,7 +88,7 @@ public class NotificationListAdapter extends RecyclerView.Adapter<NotificationLi
         View view = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.notification_item_view, viewGroup, false);
 
-        return new ViewHolder(view);
+        return new ViewHolder(view, notificationIconColor);
     }
 
     @Override
