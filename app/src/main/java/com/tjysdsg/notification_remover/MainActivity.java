@@ -72,6 +72,7 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
         notificationListener.registerListenerCallback(
                 (l) -> updateMainScreen()
         );
+        updateMainScreen();
     }
 
     @Override

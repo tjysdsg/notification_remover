@@ -13,8 +13,6 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimaryVariant"
-            app:subtitle="@string/pull_to_refresh"
-            app:subtitleCentered="true"
             app:title="@string/app_name"
             app:titleCentered="true" />
 
