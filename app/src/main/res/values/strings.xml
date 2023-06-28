@@ -7,4 +7,5 @@
     <string name="notification_clear_btn">clear</string>
     <string name="enable_button">Enable</string>
     <string name="no_notifications_prompt">No notifications found</string>
+    <string name="pull_to_refresh">Pull to refresh</string>
 </resources>

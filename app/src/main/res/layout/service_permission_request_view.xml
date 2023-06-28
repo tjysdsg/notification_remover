@@ -27,13 +27,13 @@
             android:layout_weight="1"
             android:text="@string/notification_listener_service_explanation"
             android:textAlignment="textStart"
-            android:textColor="#333333"
             android:textSize="22sp"
             android:textStyle="bold"
             android:typeface="normal" />
 
         <Button
             android:id="@+id/enable_button"
+            style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"

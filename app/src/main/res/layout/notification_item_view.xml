@@ -33,7 +33,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="App Name"
-                android:textColor="#757677"
                 android:textSize="8pt"
                 android:textStyle="bold" />
 
@@ -43,7 +42,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="Notification Title"
-                android:textColor="@color/black"
                 android:textSize="8pt"
                 android:textStyle="bold" />
 
@@ -52,7 +50,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                android:textColor="#757677"
                 android:textSize="6pt" />
         </LinearLayout>
 
@@ -63,10 +60,9 @@
             android:layout_gravity="center_vertical" />
     </LinearLayout>
 
-    <View
+    <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray" />
-
+        android:layout_height="wrap_content"
+        app:dividerInsetStart="60dp" />
 
 </LinearLayout>

@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.divider.MaterialDividerItemDecoration;
+
 public class MainActivity extends NotificationListenerActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     SwipeRefreshLayout swipeRefreshLayout;

@@ -1,7 +1,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimaryVariant"
+            app:subtitle="@string/pull_to_refresh"
+            app:subtitleCentered="true"
+            app:title="@string/app_name"
+            app:titleCentered="true" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_layout"
@@ -21,9 +38,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:padding="20dp"
         android:text="@string/no_notifications_prompt"
         android:textAlignment="center"
-        android:padding="20dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
 </LinearLayout>
