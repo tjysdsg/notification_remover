@@ -43,7 +43,7 @@ public class MainActivity extends NotificationListenerActivity implements SwipeR
         noItemsPromptView = findViewById(R.id.no_items_prompt);
 
         notificationIconColor = MaterialColors.getColor(
-                this, com.google.android.material.R.attr.colorPrimaryVariant, Color.BLACK
+                this, com.google.android.material.R.attr.colorPrimary, Color.BLACK
         );
     }
 
