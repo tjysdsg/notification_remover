@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace 'com.tjysdsg.notification_remover'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.tjysdsg.notification_remover"
         minSdk 29
         targetSdk 33
-        versionCode 4
-        versionName "0.0.4"
+        versionCode 5
+        versionName "0.0.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
